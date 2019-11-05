@@ -1,0 +1,25 @@
+{
+  "name": "homebridge-pjlink",
+  "version": "0.0.1",
+  "description": "Homebridge accessory for PJLink supported projectors",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emptygalaxy/homebridge-pjlink.git"
+  },
+  "keywords": [
+    "pjlink"
+  ],
+  "author": "Nick Timman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emptygalaxy/homebridge-pjlink/issues"
+  },
+  "homepage": "https://github.com/emptygalaxy/homebridge-pjlink#readme",
+  "dependencies": {
+    "pjlink": "^0.2.4"
+  }
+}
