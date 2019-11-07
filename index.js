@@ -1,7 +1,6 @@
 'use strict';
 
 const pjlink = require('pjlink');
-require('hap-nodejs');
 
 /**
  * @type HAPNodeJS.Service
