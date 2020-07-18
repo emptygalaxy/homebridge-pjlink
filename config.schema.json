@@ -1,0 +1,89 @@
+{
+  "pluginAlias": "PJLink",
+  "pluginType": "accessory",
+  "singular": false,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true
+      },
+      "ip": {
+        "title": "IP Address",
+        "type": "string",
+        "required": true
+      },
+      "port": {
+        "title": "Port",
+        "type": "number",
+        "default": 4352,
+        "required": false
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "default": "panasonic",
+        "required": false
+      },
+
+      "manufacturer": {
+        "title": "Manufacturer",
+        "type": "string",
+        "default": "Panasonic",
+        "required": false
+      },
+      "model": {
+        "title": "Model",
+        "type": "string",
+        "required": false
+      },
+      "serialNumber": {
+        "title": "Serial Number",
+        "type": "string",
+        "required": false
+      },
+      "version": {
+        "title": "Version",
+        "type": "string",
+        "required": false
+      },
+
+      "inputs": {
+        "type": "array",
+        "items": {
+          "title": "Inputs",
+          "type": "object",
+          "properties": {
+            "source": {
+              "title": "Source",
+              "type": "number",
+              "default": 1,
+              "required": true
+            },
+            "channel": {
+              "title": "Channel",
+              "type": "number",
+              "default": 1,
+              "required": true
+            },
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "default": "RGB 1",
+              "required": true
+            }
+          }
+        }
+      },
+      "enableSwitch": {
+        "title": "Enable switch",
+        "type": "boolean",
+        "required": false
+      }
+    }
+  },
+  "form": null,
+  "display": null
+}
