@@ -12,14 +12,19 @@
     "end": 52150,
     "comment": "This section is used to control the range of ports that separate accessory (like camera or television) should be bind to."
   },
-  "accessories": [
+  "platforms": [
     {
-      "accessory": "PJLink",
-      "name": "Projector",
-      "ip": "10.0.1.25",
-      "port": 4352,
-      "password": "panasonic",
-      "pollingInterval": 10
+      "name": "PJLink",
+      "platform": "PJLink",
+      "devices": [
+        {
+          "name": "Projector",
+          "ip": "192.168.2.26",
+          "port": 4352,
+          "password": "password",
+          "pollingInterval": 10
+        }
+      ]
     }
   ]
 }

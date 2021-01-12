@@ -1,49 +1,44 @@
 import {Logger} from 'homebridge/lib/logger';
-import {API} from 'homebridge/lib/api';
 import {
-    CharacteristicEventTypes,
+    API,
     CharacteristicGetCallback,
     CharacteristicSetCallback,
     CharacteristicValue,
+    CharacteristicEventTypes,
     Service,
-} from 'hap-nodejs';
-import {Television} from 'hap-nodejs/dist/lib/gen/HomeKit-TV';
-import {Switch} from 'hap-nodejs/dist/lib/gen/HomeKit';
-// import {PJLink} from 'pjlink';
-const PJLink = require('pjlink');
+} from 'homebridge';
+import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
+import {PJLink} from 'PJLink';
+// const PJLink = require('PJLink');
 
 export class TelevisionHandler {
-    private readonly log: Logger;
-    private readonly api: API;
-    private readonly device: PJLink;
-    private readonly name: string;
-    private readonly enableSwitch: boolean;
-
-    private readonly tvService: Television;
-    private readonly switchService?: Switch;
+    private readonly tvService: Service;
+    private readonly switchService?: Service;
 
     private deviceActive = false;
 
-    constructor(log: Logger, api: API, device: PJLink, name: string, enableSwitch=false) {
-        this.log = log;
-        this.api = api;
-        this.device = device;
-        this.name = name;
-        this.enableSwitch = enableSwitch;
-
+    constructor(
+        private readonly log: Logger,
+        private readonly api: API,
+        private readonly accessory: PlatformAccessory,
+        private readonly device: PJLink,
+        private readonly name: string,
+        private readonly enableSwitch=false,
+    ) {
         this.tvService = this.createService();
         if(this.enableSwitch) {
             this.switchService = this.createSwitchService();
         }
     }
 
-    private createService(): Television {
+    private createService(): Service {
         // hap
-        const Service = this.api.hap.Service;
         const Characteristic = this.api.hap.Characteristic;
 
         // service
-        const tvService = new Service.Television(this.name, 'tvService');
+        const tvService = (this.accessory.getService(this.api.hap.Service.Television) ||
+            this.accessory.addService(this.api.hap.Service.Television, this.name));
+
         tvService
             .setCharacteristic(Characteristic.ConfiguredName, this.name)
             .setCharacteristic(Characteristic.SleepDiscoveryMode, Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE)
@@ -58,13 +53,14 @@ export class TelevisionHandler {
         return tvService;
     }
 
-    private createSwitchService(): Switch {
+    private createSwitchService(): Service {
         // hap
         const Service = this.api.hap.Service;
         const Characteristic = this.api.hap.Characteristic;
 
         // service
-        const service = new Service.Switch(this.name);
+        const service = (this.accessory.getService(Service.Switch) ||
+            this.accessory.addService(Service.Switch, this.name));
         service.getCharacteristic(Characteristic.On)
             .on(CharacteristicEventTypes.GET, this.getTelevisionActive.bind(this))
             .on(CharacteristicEventTypes.SET, this.setTelevisionActive.bind(this))

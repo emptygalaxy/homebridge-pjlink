@@ -1,6 +1,7 @@
 import {API} from 'homebridge/lib/api';
-import {PJLinkAccessory} from './PJLinkAccessory';
+import {PJLinkPlatform} from './PJLinkPlatform';
+import {PLATFORM_NAME, PLUGIN_NAME} from './settings';
 
 export = (api: API) => {
-    api.registerAccessory('homebridge-pjlink', 'PJLink', PJLinkAccessory);
+    api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, PJLinkPlatform);
 }

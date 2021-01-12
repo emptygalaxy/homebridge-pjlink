@@ -1,45 +1,47 @@
 import {Logger} from 'homebridge/lib/logger';
-import {API} from 'homebridge/lib/api';
-import {Television} from 'hap-nodejs/dist/lib/gen/HomeKit-TV';
-import {Service} from 'hap-nodejs';
-import {AccessoryInformation} from 'hap-nodejs/dist/lib/gen/HomeKit';
+import {
+    API,
+    Service,
+} from 'homebridge';
 import {AccessoryConfig} from 'homebridge/lib/server';
-// import {PJLink} from 'pjlink';
-// const PJLink = require('pjlink');
+import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
+import {PJLink} from 'PJLink';
+// const PJLink = require('PJLink');
 
 export class InformationHandler {
-    private readonly log: Logger;
-    private readonly api: API;
-    private readonly device: PJLink;
-
     // config
     private manufacturer: string;
     private model: string;
     private serialNumber: string;
     private version: string;
 
-    private readonly informationService: AccessoryInformation;
+    private readonly informationService: Service;
 
-    constructor(log: Logger, api: API, config: AccessoryConfig, device: PJLink) {
-        this.log = log;
-        this.api = api;
-        this.device = device;
+    constructor(
+        private readonly log: Logger,
+        private readonly api: API,
+        private readonly accessory: PlatformAccessory,
+        private readonly device: PJLink,
+        config: AccessoryConfig,
+    ) {
 
         // config
-        this.manufacturer = config.manufacturer || '';
-        this.model = config.model || '';
-        this.serialNumber = config.serialNumber || '';
-        this.version = config.version || '';
+        this.manufacturer = config.manufacturer || 'Manufacturer';
+        this.model = config.model || 'Model';
+        this.serialNumber = config.serialNumber || 'Serial';
+        this.version = config.version || 'Version';
 
         this.informationService = this.createService();
     }
 
-    private createService(): Television {
+    private createService(): Service {
         // hap
         const Service = this.api.hap.Service;
         const Characteristic = this.api.hap.Characteristic;
 
-        const service = new Service.AccessoryInformation();
+        const service = (this.accessory.getService(Service.AccessoryInformation) ||
+            this.accessory.addService(Service.AccessoryInformation));
+
         service
             .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
             .setCharacteristic(Characteristic.Model, this.model)

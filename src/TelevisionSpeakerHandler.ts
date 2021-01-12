@@ -6,29 +6,24 @@ import {
     CharacteristicSetCallback,
     CharacteristicValue,
     Service,
-} from 'hap-nodejs';
-import {Television, TelevisionSpeaker} from 'hap-nodejs/dist/lib/gen/HomeKit-TV';
+} from 'homebridge';
 import {PJLink} from 'pjlink';
-// const PJLink = require('pjlink');
+import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
+// const PJLink = require('PJLink');
 
 export class TelevisionSpeakerHandler {
-    private readonly log: Logger;
-    private readonly api: API;
-    private readonly device: PJLink;
-    private readonly tvService: Television;
-    private readonly name: string;
-
-    private readonly speakerService: TelevisionSpeaker;
+    private readonly speakerService: Service;
 
     private muted = false;
 
-    constructor(log: Logger, api: API, device: PJLink, tvService: Television, name: string) {
-        this.log = log;
-        this.api = api;
-        this.device = device;
-        this.tvService = tvService;
-        this.name = name;
-
+    constructor(
+        private readonly log: Logger,
+        private readonly api: API,
+        private readonly accessory: PlatformAccessory,
+        private readonly device: PJLink,
+        private readonly tvService: Service,
+        private readonly name: string,
+    ) {
         this.speakerService = this.createSpeaker();
     }
 
@@ -42,7 +37,9 @@ export class TelevisionSpeakerHandler {
         const Characteristic = this.api.hap.Characteristic;
 
         // service
-        const service = new Service.TelevisionSpeaker(this.name, 'tvSpeaker');
+        const service = this.accessory.getService(Service.TelevisionSpeaker) ||
+            this.accessory.addService(Service.TelevisionSpeaker, this.name, 'tvSpeaker');
+
         service
             .getCharacteristic(Characteristic.Mute)
             .on(CharacteristicEventTypes.GET, this.getTelevisionMuted.bind(this))
@@ -87,8 +84,10 @@ export class TelevisionSpeakerHandler {
             callback(e);
         }
     }
-
+    
     public update(): void {
+        const Characteristic = this.api.hap.Characteristic;
+
         try {
             this.device.getMute((err: string|undefined, state: MuteState) => {
                 if(err) {
@@ -97,7 +96,7 @@ export class TelevisionSpeakerHandler {
                     this.log.info('muted', state);
                     if(state.audio !== this.muted) {
                         this.muted = state.audio;
-                        this.speakerService.updateCharacteristic(this.api.hap.Characteristic.Mute, this.muted);
+                        this.speakerService.updateCharacteristic(Characteristic.Mute, this.muted);
                     }
                 }
             });

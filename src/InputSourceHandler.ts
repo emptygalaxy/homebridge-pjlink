@@ -1,23 +1,18 @@
 import {Logger} from 'homebridge/lib/logger';
 import {API} from 'homebridge/lib/api';
-import {Television} from 'hap-nodejs/dist/lib/gen/HomeKit-TV';
 import {
     CharacteristicEventTypes,
     CharacteristicGetCallback,
     CharacteristicSetCallback,
     CharacteristicValue,
     Service,
-} from 'hap-nodejs';
+} from 'homebridge';
 import {AccessoryConfig} from 'homebridge/lib/server';
-// import {PJLink} from 'pjlink';
-const PJLink = require('pjlink');
+import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
+import {PJLink} from 'PJLink';
+// const PJLink = require('PJLink');
 
 export class InputSourceHandler {
-    private readonly log: Logger;
-    private readonly api: API;
-    private readonly device: PJLink;
-    private readonly tvService: Television;
-
     private readonly mockInputs: boolean = true;
     private readonly defaultInput: string = '31';
     private inputs: Input[] = [];
@@ -25,7 +20,13 @@ export class InputSourceHandler {
     private readonly inputServices: Service[] = [];
     private activeIdentifier?: string;
 
-    constructor(log: Logger, api: API, config: AccessoryConfig, device: PJLink, tvService: Television) {
+    constructor(
+        private readonly log: Logger,
+        private readonly api: API,
+        private readonly accessory: PlatformAccessory,
+        private readonly device: PJLink,
+        private readonly config: AccessoryConfig,
+        private readonly tvService: Service) {
         this.log = log;
         this.api = api;
         this.device = device;
@@ -84,8 +85,12 @@ export class InputSourceHandler {
             const identifier = input.code;
             const inputName = input.name;
             this.log.info(identifier, inputName);
+
+            const inputSource:Service = this.accessory.getService(identifier) ||
+                this.accessory.addService(Service.InputSource, identifier, inputName);
+
             const inputType = this.mapInputType(input.source);
-            const inputSource:Service = new Service.InputSource(inputName, inputName);
+
             inputSource
                 .setCharacteristic(Characteristic.ConfiguredName, inputName)
                 .setCharacteristic(Characteristic.InputSourceType, inputType)
@@ -93,6 +98,10 @@ export class InputSourceHandler {
                 .setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN)
                 .setCharacteristic(Characteristic.Identifier, identifier)
             ;
+
+            inputSource.getCharacteristic(this.api.hap.Characteristic.ConfiguredName)
+                .on(this.api.hap.CharacteristicEventTypes.SET, this.setConfiguredInputSourceName.bind(this, identifier));
+
 
             if(input.code === this.defaultInput) {
                 this.activeIdentifier = identifier;
@@ -137,18 +146,22 @@ export class InputSourceHandler {
     }
 
     public update(): void {
-        this.device.getInput((error?: string, input?: Input) => {
-            if(error) {
-                this.log.error(error);
-            } else {
-                if(input && input.code !== this.activeIdentifier) {
-                    this.activeIdentifier = input.code;
+        try {
+            this.device.getInput((error?: string, input?: Input) => {
+                if (error) {
+                    this.log.error(error);
+                } else {
+                    if (input && input.code !== this.activeIdentifier) {
+                        this.activeIdentifier = input.code;
 
-                    const Characteristic = this.api.hap.Characteristic;
-                    this.tvService.updateCharacteristic(Characteristic.ActiveIdentifier, this.activeIdentifier);
+                        const Characteristic = this.api.hap.Characteristic;
+                        this.tvService.updateCharacteristic(Characteristic.ActiveIdentifier, this.activeIdentifier);
+                    }
                 }
-            }
-        });
+            });
+        } catch (e) {
+            this.log.error(e);
+        }
     }
 
     private mapInputType(type): CharacteristicValue {
@@ -174,5 +187,13 @@ export class InputSourceHandler {
             default:
                 return Characteristic.InputSourceType.OTHER;
         }
+    }
+
+    private setConfiguredInputSourceName(inputIdentifier: string, value: CharacteristicValue, callback: CharacteristicSetCallback) {
+        this.log.info('Set input value', inputIdentifier, value);
+
+        // this.accessory.context.inputLabels[inputIdentifier] = value;
+
+        callback();
     }
 }
