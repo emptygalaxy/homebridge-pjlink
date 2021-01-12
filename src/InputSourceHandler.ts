@@ -9,8 +9,8 @@ import {
 } from 'homebridge';
 import {AccessoryConfig} from 'homebridge/lib/server';
 import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
-import {PJLink} from 'PJLink';
-// const PJLink = require('PJLink');
+// import {PJLink} from 'PJLink';
+const PJLink = require('PJLink');
 
 export class InputSourceHandler {
     private readonly mockInputs: boolean = true;
