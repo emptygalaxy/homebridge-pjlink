@@ -1,6 +1,6 @@
 {
   "name": "homebridge-pjlink",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Homebridge accessory for PJLink supported projectors",
   "main": "dist/index.js",
   "scripts": {
