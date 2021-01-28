@@ -16,6 +16,11 @@
           "type": "object",
           "properties": {
 
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true
+            },
             "ip": {
               "title": "IP Address",
               "type": "string",
