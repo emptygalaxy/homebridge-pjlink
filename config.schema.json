@@ -21,6 +21,11 @@
               "type": "string",
               "required": true
             },
+            "id": {
+              "title": "Identifier",
+              "type": "string",
+              "required": false
+            },
             "ip": {
               "title": "IP Address",
               "type": "string",
