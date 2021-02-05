@@ -56,11 +56,15 @@ export class PJLinkPlatform implements DynamicPlatformPlugin {
                     }
                 } else {
                     // console.log('new accessory', name, uuid);
-                    const accessory = new this.api.platformAccessory(name, uuid);
-                    accessory.context.device = device;
+                    if(!name || name === '') {
+                        this.log.error('PJLink device must be created with a non-empty name');
+                    } else {
+                        const accessory = new this.api.platformAccessory(name, uuid);
+                        accessory.context.device = device;
 
-                    new PJLinkPlatformAccessory(this.log, this.api, device, this, accessory);
-                    this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+                        new PJLinkPlatformAccessory(this.log, this.api, device, this, accessory);
+                        this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+                    }
                 }
             });
         }
