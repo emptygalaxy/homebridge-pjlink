@@ -9,7 +9,7 @@ import {
 } from 'homebridge';
 import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
 // import {PJLink} from 'PJLink';
-const PJLink = require('PJLink');
+const PJLink = require('pjlink');
 
 export class TelevisionHandler {
     private readonly tvService: Service;

@@ -12,7 +12,7 @@ import {InformationHandler} from './InformationHandler';
 import {InputSourceHandler} from './InputSourceHandler';
 import {TelevisionSpeakerHandler} from './TelevisionSpeakerHandler';
 // import {PJLink} from 'PJLink';
-const PJLink = require('PJLink');
+const PJLink = require('pjlink');
 
 export class PJLinkPlatformAccessory {
     private readonly name: string;
