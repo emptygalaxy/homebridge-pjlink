@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/emptygalaxy/homebridge-pjlink#readme",
   "dependencies": {
-    "pjlink": "^0.2.4"
+    "pjlink": "^0.2.8"
   },
   "engines": {
     "homebridge": "^1.0.4"
