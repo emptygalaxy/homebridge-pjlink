@@ -1,93 +1,100 @@
-import {Logger} from 'homebridge/lib/logger';
-import {
-    API,
-    Service,
-} from 'homebridge';
-import {AccessoryConfig} from 'homebridge/lib/server';
-import {PlatformAccessory} from 'homebridge/lib/platformAccessory';
-import {PJLink} from 'PJLink';
+import type {Logger, API, Service, PlatformAccessory} from 'homebridge';
+import {PJLink} from 'pjlink';
+import {PJLinkConfig} from './PJLinkPlatformConfig';
 // const PJLink = require('PJLink');
 
 export class InformationHandler {
+  // config
+  private manufacturer: string;
+  private model: string;
+  private serialNumber: string;
+  private version: string;
+
+  private readonly informationService: Service;
+
+  constructor(
+    private readonly log: Logger,
+    private readonly api: API,
+    private readonly accessory: PlatformAccessory,
+    private readonly device: PJLink,
+    config: PJLinkConfig
+  ) {
     // config
-    private manufacturer: string;
-    private model: string;
-    private serialNumber: string;
-    private version: string;
+    this.manufacturer = config.manufacturer || 'Manufacturer';
+    this.model = config.model || 'Model';
+    this.serialNumber = config.serialNumber || 'Serial';
+    this.version = config.version || 'Version';
 
-    private readonly informationService: Service;
+    this.informationService = this.createService();
+  }
 
-    constructor(
-        private readonly log: Logger,
-        private readonly api: API,
-        private readonly accessory: PlatformAccessory,
-        private readonly device: PJLink,
-        config: AccessoryConfig,
-    ) {
+  private createService(): Service {
+    // hap
+    const Service = this.api.hap.Service;
+    const Characteristic = this.api.hap.Characteristic;
 
-        // config
-        this.manufacturer = config.manufacturer || 'Manufacturer';
-        this.model = config.model || 'Model';
-        this.serialNumber = config.serialNumber || 'Serial';
-        this.version = config.version || 'Version';
+    const service =
+      this.accessory.getService(Service.AccessoryInformation) ||
+      this.accessory.addService(Service.AccessoryInformation);
 
-        this.informationService = this.createService();
-    }
+    service
+      .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
+      .setCharacteristic(Characteristic.Model, this.model)
+      .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
+      .setCharacteristic(Characteristic.FirmwareRevision, this.version);
 
-    private createService(): Service {
-        // hap
-        const Service = this.api.hap.Service;
-        const Characteristic = this.api.hap.Characteristic;
+    this.update();
 
-        const service = (this.accessory.getService(Service.AccessoryInformation) ||
-            this.accessory.addService(Service.AccessoryInformation));
+    return service;
+  }
 
-        service
-            .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-            .setCharacteristic(Characteristic.Model, this.model)
-            .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
-            .setCharacteristic(Characteristic.FirmwareRevision, this.version)
-        ;
+  public getService(): Service {
+    return this.informationService;
+  }
 
-        this.update();
+  public update(): void {
+    // hap
+    const Characteristic = this.api.hap.Characteristic;
 
-        return service;
-    }
-
-    public getService(): Service {
-        return this.informationService;
-    }
-
-    public update(): void {
-        // hap
-        const Characteristic = this.api.hap.Characteristic;
-
-        try {
-            this.device.getManufacturer((error?: string, manufacturer?: string): void => {
-                this.log.info('getManufacturer', error, manufacturer);
-                if (!error && manufacturer) {
-                    this.manufacturer = manufacturer;
-                    this.informationService.updateCharacteristic(Characteristic.Manufacturer, this.manufacturer);
-                }
-            });
-
-            this.device.getModel((error?: string, model?: string): void => {
-                this.log.info('getModel', error, model);
-                if (!error && model) {
-                    this.model = model;
-                    this.informationService.updateCharacteristic(Characteristic.Model, this.model);
-                }
-            });
-
-            this.device.getInfo((error?: string, info?: string): void => {
-                this.log.info('info', error, info);
-                if (!error && info) {
-                    this.version = info;
-                    this.informationService.updateCharacteristic(Characteristic.FirmwareRevision, this.version);
-                }
-            });
-        } catch (e) {
-            this.log.error(e);
+    try {
+      this.device.getManufacturer(
+        (error?: string, manufacturer?: string): void => {
+          this.log.info('getManufacturer', error, manufacturer);
+          if (!error && manufacturer) {
+            this.manufacturer = manufacturer;
+            this.informationService.updateCharacteristic(
+              Characteristic.Manufacturer,
+              this.manufacturer
+            );
+          }
         }
+      );
+
+      this.device.getModel((error?: string, model?: string): void => {
+        this.log.info('getModel', error, model);
+        if (!error && model) {
+          this.model = model;
+          this.informationService.updateCharacteristic(
+            Characteristic.Model,
+            this.model
+          );
+        }
+      });
+
+      this.device.getInfo((error?: string, info?: string): void => {
+        this.log.info('info', error, info);
+        if (!error && info) {
+          this.version = info;
+          this.informationService.updateCharacteristic(
+            Characteristic.FirmwareRevision,
+            this.version
+          );
+        }
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        this.log.error(e.message);
+      }
     }
+  }
 }
