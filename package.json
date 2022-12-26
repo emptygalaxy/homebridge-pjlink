@@ -11,6 +11,7 @@
     "clean": "rimraf ./dist",
     "build": "npm run clean && tsc",
     "prepublishOnly": "npm run lint && npm audit && npm run build",
+    "postpublish": "git push",
     "publish-beta": "npm version prepatch --preid beta && npm publish --tag=beta"
   },
   "repository": {
